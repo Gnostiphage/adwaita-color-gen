@@ -290,7 +290,9 @@ else
 		mogrify_mod="${mogrify_mods[$i]}"
 		create_variant $color $scss_color $svg0_color $svg1_color $svg2_color $mogrify_mod
 	done
-	tar -czvf archives/Adwaita-all.tar.gz generated
+	if [ "$compress_option" == "Y" ] || [ "$compress_option" == "y" ] ; then
+		tar -czvf archives/Adwaita-all.tar.gz generated
+	fi
 fi
 
 echo "cleaning up"
