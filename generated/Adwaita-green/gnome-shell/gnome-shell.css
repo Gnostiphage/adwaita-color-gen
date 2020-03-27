@@ -534,9 +534,9 @@ StScrollBar StButton#vhandle:active, StScrollBar StButton#hhandle:active { backg
 
 .switcher-list .item-box { padding: 8px; border-radius: 6px; border: 1px solid transparent; }
 
-.switcher-list .item-box:outlined { border: 1px solid #c1bab3; background-color: rgba(238, 238, 236, 0.1); box-shadow: inset 0 2px 2px 0 rgba(0, 0, 0, 0.4); }
+.switcher-list .item-box:outlined { background-color: rgba(238, 238, 236, 0.3); }
 
-.switcher-list .item-box:selected { background-color: rgba(238, 238, 236, 0.1); color: #eeeeec; }
+.switcher-list .item-box:selected { background-color: rgba(238, 238, 236, 0.3); color: #eeeeec; }
 
 .switcher-list .thumbnail-box { padding: 2px; spacing: 6px; }
 

@@ -146,7 +146,7 @@ wget -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archi
 echo extracting sources
 tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzvf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-master-data-theme/data/theme
 #tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
-tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita
+tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
 rm -f ./Adwaita-sources/*.tar.gz
 rm -f ./Adwaita-sources/gtk-3.0/assets/*.png
 
@@ -164,17 +164,90 @@ for i in $(grep -lr "resource:///org" ./Adwaita-sources) ; do
 done
 
 #time to make different colors
+#make the new hue
+change_hue() {
+        r="0x${1:1:2}"
+        g="0x${1:3:2}"
+        b="0x${1:5:2}"
+        if [[ $r -ge $g ]] && [[ $r -ge $b ]] ; then
+                max=$r
+        elif [[ $g -ge $b ]] ; then
+                max=$g
+        else
+                max=$b
+        fi
+        if [[ $r -lt $g ]] && [[ $r -lt $b ]] ; then
+                min=$r
+        elif [[ $g -lt $b ]] ; then
+                min=$g
+        else
+                min=$b
+        fi
+        if ([[ $g -lt $r ]] && [[ $r -lt $b ]]) || ([[ $b -lt $r ]] && [[ $r -lt $g ]]) ; then
+                mid=$r
+        elif ([[ $r -lt $g ]] && [[ $g -lt $b ]]) || ([[ $b -lt $g ]] && [[ $g -lt $r ]]) ; then
+                mid=$g
+        else
+                mid=$b
+        fi
+        avg="0x$(printf '%02x' "$(( ($max + $min)/2 ))")"
+	middiffs=("$(( $max - $mid ))" "$(( ($avg - $mid) % 0xff ))" "$(( ($mid - $avg) % 0xff ))" "$(( $mid - $min ))")
+        diff=${middiffs[0]}
+        for i in "${middiffs[@]}" ; do
+                if [[ "$i" -lt 0 ]] ; then
+                        i=$(( 0 - $i))
+                fi
+                if [[ "$i" -lt "$diff" ]] ; then
+                        diff="$i"
+                fi
+        done
+        mid0="0x$(printf '%02x' "$(( $min + $diff ))")"
+        mid1="0x$(printf '%02x' "$(( $avg - $diff ))")"
+        mid2="0x$(printf '%02x' "$(( $avg + $diff ))")"
+        mid3="0x$(printf '%02x' "$(( $max - $diff ))")"
+
+        case $2 in
+                "gray") local new_hue="#${avg:2:2}${avg:2:2}${avg:2:2}" ;;
+                "red") local new_hue="#${max:2:2}${mid0:2:2}${min:2:2}" ;;
+                "orange") local new_hue="#${max:2:2}${mid2:2:2}${min:2:2}" ;;
+                "yellow") local new_hue="#${mid3:2:2}${max:2:2}${min:2:2}" ;;
+                "grass") local new_hue="#${mid1:2:2}${max:2:2}${min:2:2}" ;;
+                "green") local new_hue="#${min:2:2}${max:2:2}${mid0:2:2}" ;;
+                "teal") local new_hue="#${min:2:2}${max:2:2}${mid2:2:2}" ;;
+                "cyan") local new_hue="#${min:2:2}${mid3:2:2}${max:2:2}" ;;
+                "blue") local new_hue="#${min:2:2}${mid1:2:2}${max:2:2}" ;;
+                "indigo") local new_hue="#${mid0:2:2}${min:2:2}${max:2:2}" ;;
+                "violet") local new_hue="#${mid2:2:2}${min:2:2}${max:2:2}" ;;
+                "magenta") local new_hue="#${max:2:2}${min:2:2}${mid3:2:2}" ;;
+                "pink") local new_hue="#${max:2:2}${min:2:2}${mid1:2:2}" ;;
+                *) echo wtf ; exit 1 ;;
+        esac
+	echo $new_hue
+}
+
+#take $color $filepath and $search_term as arguments, replacing color values with appropriate hues on lines with the term
+#if the search term is blank, replace all hues in the file
+replace_hue() {
+	if [[ -n $3 ]]; then
+		for i in $(grep $3 $2 | grep -o "#[0-9a-fA-F]\{6\}") ; do
+			sed -i "/$3/s/#[0-9a-fA-F]\{6\}/$(change_hue $i $1)/g" $2
+		done
+	else
+		for i in $(grep -o "#[0-9a-fA-F]\{6\}" $2); do
+			sed -i "s/#[0-9a-fA-F]\{6\}/$(change_hue $i $1)/g" $2
+		done
+	fi
+
+}
+
+
 #color definitions and associated variable arrays
 colors=( "gray" "red" "orange" "yellow" "grass" "green" "teal" "cyan" "blue" "indigo" "violet" "magenta" "pink" )
-scss_colors=( "#8d8d8d" "#e43d35" "#e49535" "#dce435" "#84e435" "#35e43d" "#35e495" "#35dce4" "#3584e4" "#3d35e4" "#9535e4" "#e435dc" "#e43584" )
-svg0_colors=( "#6c6c6c" "#a43b34" "#a47334" "#9da434" "#65a434" "#34a43b" "#34a473" "#349da4" "#3465a4" "#3b34a4" "#7334a4" "#a4349d" "#a43465" )
-svg1_colors=( "#8a8a8a" "#e33930" "#e39230" "#dae330" "#81e330" "#30e339" "#30e392" "#30dae3" "#3081e3" "#3930e3" "#9230e3" "#e330da" "#e33081" )
-svg2_colors=( "#5a5a5a" "#9e1c15" "#9e6015" "#979e15" "#539e15" "#159e1c" "#159e60" "#15979e" "#15539e" "#1c159e" "#60159e" "#9e1597" "#9e1553" )
 mogrify_mods=( "100,0,100" "100,100,183.3" "100,100,200" "100,100,16.7" "100,100,33.3" "100,100,50" "100,100,66.7" "100,100,83.3" "100,100,100" "100,100,116.7" "100,100,133.3" "100,100,150" "100,100,166.7" )
 
 #function to abstract the process per color, takes four arguments, taken from the arrays above
 create_variant() {
-	echo making $1 variant with hex values $2, $3, $4, and $5, and mogrify mod $6 
+	echo making $1 variant with mogrify mod $2
 
 	#make directories for light and dark versions of color
 	mkdir -p generated/Adwaita-$1{,-dark}
@@ -183,13 +256,14 @@ create_variant() {
 	cp -r Adwaita-sources/* generated/Adwaita-$1
 
 	#edit the main css colors for gtk3 and gnome-shell
-	sed -i "/selected_bg_color/s/#[0-9a-fA-F]\{6\}/$2/g" generated/Adwaita-$1/{gtk-3.0,gnome-shell/gnome-shell-sass}/_colors.scss
+	for i in generated/Adwaita-$1/{gtk-3.0,gnome-shell/gnome-shell-sass}/_colors.scss ; do
+		replace_hue $1 $i selected_bg_color
+	done
 
 	#edit the svg's colors, for gnome-shell and generated gtk3 assets
-	sed -i "s/#3465a4/$3/g" generated/Adwaita-$1/gtk-3.0/assets.svg
-	sed -i "s/#3465a4/$3/g" generated/Adwaita-$1/gnome-shell/*.svg
-	sed -i "s/#3081e3/$4/g" generated/Adwaita-$1/gnome-shell/*.svg
-	sed -i "s/#15539e/$5/g" generated/Adwaita-$1/gnome-shell/*.svg
+	for i in generated/Adwaita-$1/{gtk-3.0,gnome-shell}/*.svg ; do
+		replace_hue $1 $i
+	done
 
 	#render the png assets from the modified svg (pulled from render-assets.sh, modified to work)
 	for i in $(cat generated/Adwaita-$1/gtk-3.0/assets.txt) ; do
@@ -241,7 +315,9 @@ create_variant() {
 
 	#modify the gtk2 assets directly
 	mogrify -modulate $6 generated/Adwaita-$1/gtk-2.0/assets/*.png
+	replace_hue $1 Adwaita-$1/gtk-2.0/gtkrc "selected_bg_color"
 	mogrify -modulate $6 generated/Adwaita-$1-dark/gtk-2.0/assets/*.png
+	replace_hue $1 Adwaita-$1-dark/gtk-2.0/gtkrc "selected_bg_color"
 
 	#link gtk.css to the appropriate file
         echo linking gtk.css as appropriate
@@ -274,21 +350,13 @@ create_variant() {
 #use the user input as the index value, unless it's 13, then do all of them
 if [ "$color_option" -ge 0 ] && [ "$color_option" -le 12 ]; then
 	color="${colors[$color_option]}"
-	scss_color="${scss_colors[$color_option]}"
-	svg0_color="${svg0_colors[$color_option]}"
-	svg1_color="${svg1_colors[$color_option]}"
-	svg2_color="${svg2_colors[$color_option]}"
 	mogrify_mod="${mogrify_mods[$color_option]}"
-	create_variant $color $scss_color $svg0_color $svg1_color $svg2_color $mogrify_mod
+	create_variant $color $mogrify_mod
 else
 	for i in "${!colors[@]}"; do
 		color="${colors[$i]}"
-		scss_color="${scss_colors[$i]}"
-		svg0_color="${svg0_colors[$i]}"
-		svg1_color="${svg1_colors[$i]}"
-		svg2_color="${svg2_colors[$i]}"
 		mogrify_mod="${mogrify_mods[$i]}"
-		create_variant $color $scss_color $svg0_color $svg1_color $svg2_color $mogrify_mod
+		create_variant $color $mogrify_mod
 	done
 	if [ "$compress_option" == "Y" ] || [ "$compress_option" == "y" ] ; then
 		tar -czvf archives/Adwaita-all.tar.gz generated
