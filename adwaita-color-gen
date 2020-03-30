@@ -16,6 +16,7 @@ if [ $# -eq 0 ]; then
 else
 	#setting defaults
 	install_option="n"
+	delete_option="n"
 	compress_option="n"
 	verbose_option="n"
 
@@ -135,7 +136,7 @@ if [ "$install_option" != "Y" ] && [ "$install_option" != "y" ] && [ "$install_o
         exit 1
 fi
 if [ "$delete_option" != "Y" ] && [ "$delete_option" != "y" ] && [ "$delete_option" != "N" ] && [ "$delete_option" != "n" ]; then
-	echo "Please only enter Y or n for compression option, case insensitive."
+	echo "Please only enter Y or n for deletion option, case insensitive."
         exit 1
 fi
 if [ "$compress_option" != "Y" ] && [ "$compress_option" != "y" ] && [ "$compress_option" != "N" ] && [ "$compress_option" != "n" ]; then
@@ -143,7 +144,7 @@ if [ "$compress_option" != "Y" ] && [ "$compress_option" != "y" ] && [ "$compres
         exit 1
 fi
 if [ "$verbose_option" != "Y" ] && [ "$verbose_option" != "y" ] && [ "$verbose_option" != "N" ] && [ "$verbose_option" != "n" ]; then
-	echo "Please only enter Y or n for compression option, case insensitive."
+	echo "Please only enter Y or n for verbosity option, case insensitive."
         exit 1
 fi
 
@@ -391,6 +392,13 @@ create_variant() {
         cp /usr/share/themes/Adwaita-dark/index.theme generated/Adwaita-$1-dark/
         sed -i "/Name=/s/Adwaita/Adwaita-$1/g" generated/Adwaita-$1-dark/index.theme
 	
+	#compress all generated files, add to archive folder
+	if [ "$compress_option" == "Y" ] || [ "$compress_option" == "y" ] ; then
+		verbose "compressing to archives/Adwaita-$1.tar.gz and archives/Adwaita-$1-dark.tar.gz"
+		tar -czvf archives/Adwaita-$1.tar.gz -C generated Adwaita-$1
+		tar -czvf archives/Adwaita-$1-dark.tar.gz -C generated Adwaita-$1-dark
+	fi
+
 	#copy generated file to .themes directory, if installing
 	if [ "$install_option" == "Y" ] || [ "$install_option" == "y" ] ; then
 		verbose "installing Adwaita-$1"
@@ -402,13 +410,6 @@ create_variant() {
 			verbose "deleting generated/Adwaita-$1 directories after install"
 			rm -rf generated/Adwaita-$1{,-dark}
 		fi
-	fi
-
-	#compress all generated files, add to archive folder
-	if [ "$compress_option" == "Y" ] || [ "$compress_option" == "y" ] ; then
-		verbose "compressing to archives/Adwaita-$1.tar.gz and archives/Adwaita-$1-dark.tar.gz"
-		tar -czvf archives/Adwaita-$1.tar.gz -C generated Adwaita-$1
-		tar -czvf archives/Adwaita-$1-dark.tar.gz -C generated Adwaita-$1-dark
 	fi
 
         verbose "done with Adwaita-$1"
