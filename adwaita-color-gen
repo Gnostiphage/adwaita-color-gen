@@ -196,16 +196,28 @@ verbose "downloading sources if none exist"
 if [ -f ./Adwaita-sources/gnome-shell.tar.gz -a -f ./Adwaita-sources/gtk3.tar.gz ]; then
 	verbose files exist, using them
 else
-	wget -O ./Adwaita-sources/gnome-shell.tar.gz https://gitlab.gnome.org/GNOME/gnome-shell/-/archive/master/gnome-shell-master.tar.gz?path=data/theme
-	# wget -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/master/gtk-master.tar.gz?path=gtk/theme/Adwaita #master branch doesn't have working scrollbars
-	wget -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/gtk-3-24/gtk-gtk-3-24.tar.gz?path=gtk/theme/Adwaita #3.24
+	if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
+		wget -O ./Adwaita-sources/gnome-shell.tar.gz https://gitlab.gnome.org/GNOME/gnome-shell/-/archive/master/gnome-shell-master.tar.gz?path=data/theme
+		# wget -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/master/gtk-master.tar.gz?path=gtk/theme/Adwaita #master branch doesn't have working scrollbars
+		wget -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/gtk-3-24/gtk-gtk-3-24.tar.gz?path=gtk/theme/Adwaita #3.24
+	else
+		wget -q -O ./Adwaita-sources/gnome-shell.tar.gz https://gitlab.gnome.org/GNOME/gnome-shell/-/archive/master/gnome-shell-master.tar.gz?path=data/theme
+		# wget -q -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/master/gtk-master.tar.gz?path=gtk/theme/Adwaita #master branch doesn't have working scrollbars
+		wget -q -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/gtk-3-24/gtk-gtk-3-24.tar.gz?path=gtk/theme/Adwaita #3.24
+	fi
 fi
 
 #extract sources, clean-up archives and gtk3 assets (that need to be regenerated anyway)
 verbose "extracting sources"
-tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzvf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-master-data-theme/data/theme
-#tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
-tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
+if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
+	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzvf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-master-data-theme/data/theme
+	#tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
+	tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
+else
+	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-master-data-theme/data/theme
+	#tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
+	tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
+fi
 rm -f ./Adwaita-sources/gtk-3.0/assets/*.png
 
 #easier to overwrite gtk.css than modify them to work
@@ -307,18 +319,15 @@ mogrify_mods=( "100,0,100" "100,100,183.3" "100,100,200" "100,100,16.7" "100,100
 
 #function to abstract the process per color, takes four arguments, taken from the arrays above
 create_variant() {
-	verbose "making $1 variant, modifying gtk2 pngs with \'mogrify -moduluate $2\'"
+	verbose "making $1 variant, modifying gtk2 pngs with mogrify -moduluate $2"
 
 	#make directories for light and dark versions of color
 	verbose "making directories and copying files"
 	mkdir -p generated/Adwaita-$1{,-dark}
 
-	#copy working contents into one directory
+	#copy working contents into one directory, removing extraneous tar files afterwards
 	cp -r Adwaita-sources/* generated/Adwaita-$1
-
-	#copy gtk2 folders to respective directories
-	cp -r /usr/share/themes/Adwaita/gtk-2.0 ./generated/Adwaita-$1/
-	cp -r /usr/share/themes/Adwaita-dark/gtk-2.0 ./generated/Adwaita-$1-dark/
+	rm -f generated/Adwaita-$1/*.tar.gz
 
 	#edit the main css colors for gtk3 and gnome-shell
 	for i in generated/Adwaita-$1/{gtk-3.0,gnome-shell/gnome-shell-sass}/_colors.scss ; do
@@ -365,6 +374,10 @@ create_variant() {
         verbose "copying assets to dark version"
         cp -r generated/Adwaita-$1/* generated/Adwaita-$1-dark
 
+	#copy gtk2 folders to respective directories
+	cp -r /usr/share/themes/Adwaita/gtk-2.0 ./generated/Adwaita-$1/
+	cp -r /usr/share/themes/Adwaita-dark/gtk-2.0 ./generated/Adwaita-$1-dark/
+
 	#generate dark version of gnome-shell css from the scss file
         verbose "generating Adwaita-$1-dark gnome-shell.css"
         sassc -M -t compact generated/Adwaita-$1-dark/gnome-shell/gnome-shell.scss generated/Adwaita-$1-dark/gnome-shell/gnome-shell.css
@@ -395,8 +408,13 @@ create_variant() {
 	#compress all generated files, add to archive folder
 	if [ "$compress_option" == "Y" ] || [ "$compress_option" == "y" ] ; then
 		verbose "compressing to archives/Adwaita-$1.tar.gz and archives/Adwaita-$1-dark.tar.gz"
-		tar -czvf archives/Adwaita-$1.tar.gz -C generated Adwaita-$1
-		tar -czvf archives/Adwaita-$1-dark.tar.gz -C generated Adwaita-$1-dark
+		if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
+			tar -czvf archives/Adwaita-$1.tar.gz -C generated Adwaita-$1
+			tar -czvf archives/Adwaita-$1-dark.tar.gz -C generated Adwaita-$1-dark
+		else
+			tar -czf archives/Adwaita-$1.tar.gz -C generated Adwaita-$1
+			tar -czf archives/Adwaita-$1-dark.tar.gz -C generated Adwaita-$1-dark
+		fi
 	fi
 
 	#copy generated file to .themes directory, if installing
@@ -428,7 +446,11 @@ else
 	done
 	if [ "$compress_option" == "Y" ] || [ "$compress_option" == "y" ] ; then
 		verbose "compressing all generated variants to archives/Adwaita-all.tar.gz"
-		tar -czvf archives/Adwaita-all.tar.gz generated
+		if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
+			tar -czvf archives/Adwaita-all.tar.gz generated
+		else
+			tar -czf archives/Adwaita-all.tar.gz generated
+		fi
 	fi
 fi
 
