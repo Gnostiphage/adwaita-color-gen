@@ -61,7 +61,7 @@
        style="display:inline"
        transform="translate(326,44.862171)">
       <rect
-         style="opacity:0.49375;color:#ffffff;fill:url(#radialGradient68155-2-3);fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         style="opacity:0.49375;color:#000000;fill:url(#radialGradient68155-2-3);fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          id="rect99969"
          width="76"
          height="2"
@@ -70,7 +70,7 @@
          rx="0"
          ry="0" />
       <path
-         style="opacity:0.43125;color:#ffffff;fill:url(#radialGradient68157-0-8);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         style="opacity:0.43125;color:#000000;fill:url(#radialGradient68157-0-8);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          id="path99971"
          d="M 61,487.5 C 61,493.29899 56.29899,498 50.5,498 44.70101,498 40,493.29899 40,487.5 40,481.70101 44.70101,477 50.5,477 c 5.79899,0 10.5,4.70101 10.5,10.5 z"
          transform="matrix(1.2857143,0,0,1.2857143,-14.428572,-139.28571)" />
@@ -78,7 +78,7 @@
          transform="matrix(0.43589747,0,0,0.43589747,28.487179,275)"
          d="M 61,487.5 C 61,493.29899 56.29899,498 50.5,498 44.70101,498 40,493.29899 40,487.5 40,481.70101 44.70101,477 50.5,477 c 5.79899,0 10.5,4.70101 10.5,10.5 z"
          id="path99973"
-         style="color:#ffffff;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     </g>
   </g>
 </svg>

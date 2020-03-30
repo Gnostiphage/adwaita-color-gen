@@ -8,11 +8,14 @@ if [ $# -eq 0 ]; then
 	read install_option
 	echo "Do you want to generate compressed archive files locally? [Y/n]"
 	read compress_option
+	echo "Do you want this script to be verbose? [Y/n]"
+	read verbose_option
 #if arguments, parse for options
 else
 	#setting defaults
 	install_option="n"
 	compress_option="n"
+	verbose_option="n"
 
 	#scan through arguments for options/colors
 	while [ -n "$1" ]; do
@@ -99,6 +102,17 @@ if [ "$compress_option" != "Y" ] && [ "$compress_option" != "y" ] && [ "$compres
 	echo "Please only enter Y or n for compression option, case insensitive."
         exit 1
 fi
+if [ "$verbose_option" != "Y" ] && [ "$verbose_option" != "y" ] && [ "$verbose_option" != "N" ] && [ "$verbose_option" != "n" ]; then
+	echo "Please only enter Y or n for compression option, case insensitive."
+        exit 1
+fi
+
+#function to streamline verbosity
+verbose() {
+	if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
+		echo $1
+	fi
+}
 
 #check dependencies
 echo checking dependencies
@@ -230,11 +244,11 @@ change_hue() {
 replace_hue() {
 	if [[ -n $3 ]]; then
 		for i in $(grep $3 $2 | grep -o "#[0-9a-fA-F]\{6\}") ; do
-			sed -i "/$3/s/#[0-9a-fA-F]\{6\}/$(change_hue $i $1)/g" $2
+			sed -i "/$3/s/$i/$(change_hue $i $1)/g" $2
 		done
 	else
 		for i in $(grep -o "#[0-9a-fA-F]\{6\}" $2); do
-			sed -i "s/#[0-9a-fA-F]\{6\}/$(change_hue $i $1)/g" $2
+			sed -i "s/$i/$(change_hue $i $1)/g" $2
 		done
 	fi
 
@@ -254,6 +268,10 @@ create_variant() {
 
 	#copy working contents into one directory
 	cp -r Adwaita-sources/* generated/Adwaita-$1
+
+	#copy gtk2 folders to respective directories
+	cp -r /usr/share/themes/Adwaita/gtk-2.0 ./generated/Adwaita-$1/
+	cp -r /usr/share/themes/Adwaita-dark/gtk-2.0 ./generated/Adwaita-$1-dark/
 
 	#edit the main css colors for gtk3 and gnome-shell
 	for i in generated/Adwaita-$1/{gtk-3.0,gnome-shell/gnome-shell-sass}/_colors.scss ; do
@@ -309,15 +327,11 @@ create_variant() {
 	sed -i -e 's/dark/light/g' generated/Adwaita-$1/gnome-shell/gnome-shell.scss
         sassc -M -t compact generated/Adwaita-$1/gnome-shell/gnome-shell.scss generated/Adwaita-$1/gnome-shell/gnome-shell.css
 
-	#copy gtk2 folders to respective directories
-	cp -r /usr/share/themes/Adwaita/gtk-2.0 ./generated/Adwaita-$1/
-	cp -r /usr/share/themes/Adwaita-dark/gtk-2.0 ./generated/Adwaita-$1-dark/
-
 	#modify the gtk2 assets directly
-	mogrify -modulate $6 generated/Adwaita-$1/gtk-2.0/assets/*.png
-	replace_hue $1 Adwaita-$1/gtk-2.0/gtkrc "selected_bg_color"
-	mogrify -modulate $6 generated/Adwaita-$1-dark/gtk-2.0/assets/*.png
-	replace_hue $1 Adwaita-$1-dark/gtk-2.0/gtkrc "selected_bg_color"
+	mogrify -modulate $2 generated/Adwaita-$1/gtk-2.0/assets/*.png
+	replace_hue $1 generated/Adwaita-$1/gtk-2.0/gtkrc "selected_bg_color"
+	mogrify -modulate $2 generated/Adwaita-$1-dark/gtk-2.0/assets/*.png
+	replace_hue $1 generated/Adwaita-$1-dark/gtk-2.0/gtkrc "selected_bg_color"
 
 	#link gtk.css to the appropriate file
         echo linking gtk.css as appropriate
@@ -325,7 +339,7 @@ create_variant() {
         ln -s gtk-dark.css generated/Adwaita-$1-dark/gtk-3.0/gtk.css
 
 	#copy the appropriate index.theme to the light or dark folders, then edit for colors
-        echo copying and modifying default Adwaita index.theme to generated/Adwaita-$1
+        echo copying and modifying index.theme file to reflect new color
         cp /usr/share/themes/Adwaita/index.theme generated/Adwaita-$1/
         sed -i "/Name=/s/Adwaita/Adwaita-$1/g" generated/Adwaita-$1/index.theme
         cp /usr/share/themes/Adwaita-dark/index.theme generated/Adwaita-$1-dark/

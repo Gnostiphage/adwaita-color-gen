@@ -19,8 +19,8 @@
      id="defs3473" />
   <sodipodi:namedview
      id="base"
-     pagecolor="#bebebe"
-     bordercolor="#bebebe"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
@@ -85,11 +85,11 @@
            inkscape:connector-curvature="0"
            d="m 543.0002,301 c -1.05237,0 -2,0.84508 -2,1.9375 l 0,11.125 c 0,1.09242 0.94763,1.9375 2,1.9375 l 11,0 c 1.05237,0 2,-0.84508 2,-1.9375 l 0,-11.125 c 0,-1.09242 -0.94763,-1.9375 -2,-1.9375 l -11,0 z m 0,5 3.03125,0 0,2 -3.03125,0 0,-2 z m 4.03125,0 2.96875,0 0,2 -2.96875,0 0,-2 z m 3.96875,0 3,0 0,2 -3,0 0,-2 z m -8,3 3.03125,0 0,2 -3.03125,0 0,-2 z m 4.03125,0 2.96875,0 0,2 -2.96875,0 0,-2 z m 3.96875,0 3,0 0,2 -3,0 0,-2 z m -8,3 3.03125,0 0,2 -3.03125,0 0,-2 z m 4.03125,0 2.96875,0 0,2 -2.96875,0 0,-2 z m 3.96875,0 3,0 0,2 -3,0 0,-2 z"
            id="path19157"
-           style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#bebebe;fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:2;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:new;font-family:Sans;-inkscape-font-specification:Sans" />
+           style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:2;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:new;font-family:Sans;-inkscape-font-specification:Sans" />
         <rect
            height="1.9999993"
            id="rect19159"
-           style="opacity:0.35;color:#bebebe;fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           style="opacity:0.35;color:#000000;fill:#bebebe;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
            width="2.9999993"
            x="551.00018"
            y="309" />
