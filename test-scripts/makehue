@@ -1,0 +1,72 @@
+#!/bin/bash
+        r="0x${1:1:2}"
+        g="0x${1:3:2}"
+        b="0x${1:5:2}"
+        if [[ $r -ge $g ]] && [[ $r -ge $b ]] ; then 
+                max=$r 
+        elif [[ $g -ge $b ]] ; then 
+                max=$g 
+        else 
+                max=$b 
+        fi
+        if [[ $r -lt $g ]] && [[ $r -lt $b ]] ; then 
+                min=$r 
+        elif [[ $g -lt $b ]] ; then 
+                min=$g 
+        else 
+                min=$b
+        fi
+	if ([[ $g -lt $r ]] && [[ $r -lt $b ]]) || ([[ $b -lt $r ]] && [[ $r -lt $g ]]) ; then 
+                mid=$r 
+        elif ([[ $r -lt $g ]] && [[ $g -lt $b ]]) || ([[ $b -lt $g ]] && [[ $g -lt $r ]]) ; then 
+                mid=$g
+        else 
+                mid=$b
+        fi
+	avg="0x$(printf '%02x' "$(( ($max + $min)/2 ))")"
+        middiffs=("$(( $max - $mid ))" "$(( ($avg - $mid) % 0xff ))" "$(( ($mid - $avg) % 0xff ))" "$(( $mid - $min ))")
+        diff=${middiffs[0]}
+#        echo r:$r
+#	echo g:$g
+#	echo b:$b
+#	echo max:$max
+#	echo mid:$mid
+#	echo min:$min
+#	echo avg:$avg
+#	echo cdiff:$diff
+	for i in "${middiffs[@]}" ; do
+		if [[ "$i" -lt 0 ]] ; then
+			i=$(( 0 - $i))
+		fi
+                if [[ "$i" -lt "$diff" ]] ; then
+                        diff="$i"
+                fi
+#		echo idiff:$i
+#		echo cdiff:$diff
+        done
+	mid0="0x$(printf '%02x' "$(( $min + $diff ))")"
+	mid1="0x$(printf '%02x' "$(( $avg - $diff ))")"
+	mid2="0x$(printf '%02x' "$(( $avg + $diff ))")"
+	mid3="0x$(printf '%02x' "$(( $max - $diff ))")"
+#	echo mid0:$mid0
+#	echo mid1:$mid1
+#	echo mid2:$mid2
+#	echo mid3:$mid3
+
+        case $2 in
+                "gray") new_hue="#${avg:2:2}${avg:2:2}${avg:2:2}" ;;
+                "red") new_hue="#${max:2:2}${mid0:2:2}${min:2:2}" ;;
+                "orange") new_hue="#${max:2:2}${mid2:2:2}${min:2:2}" ;;
+                "yellow") new_hue="#${mid3:2:2}${max:2:2}${min:2:2}" ;;
+                "grass") new_hue="#${mid1:2:2}${max:2:2}${min:2:2}" ;;
+                "green") new_hue="#${min:2:2}${max:2:2}${mid0:2:2}" ;;
+                "teal") new_hue="#${min:2:2}${max:2:2}${mid2:2:2}" ;;
+                "cyan") new_hue="#${min:2:2}${mid3:2:2}${max:2:2}" ;;
+                "blue") new_hue="#${min:2:2}${mid1:2:2}${max:2:2}" ;;
+                "indigo") new_hue="#${mid0:2:2}${min:2:2}${max:2:2}" ;;
+                "violet") new_hue="#${mid2:2:2}${min:2:2}${max:2:2}" ;;
+                "magenta") new_hue="#${max:2:2}${min:2:2}${mid3:2:2}" ;;
+                "pink") new_hue="#${max:2:2}${min:2:2}${mid1:2:2}" ;;
+                *) echo wtf ; exit 1 ;;
+        esac
+	echo $new_hue
