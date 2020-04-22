@@ -2,7 +2,7 @@
 
 #present options if no arguments given
 if [ $# -eq 0 ]; then
-	echo -e "Please select which Adwaita variant to generate:\n 0: gray\t 1: red \t 2: orange\t 3: yellow\n 4: grass\t 5: green\t 6: teal\t 7: cyan\n 8: blue\t 9: indigo\t10: violet\t11: magenta\n12: pink\t13: all"
+	echo -e "Please select which Adwaita variant to generate, or enter a hex value (e.g. #123456):\n 0: gray\t 1: red \t 2: orange\t 3: yellow\n 4: grass\t 5: green\t 6: teal\t 7: cyan\n 8: blue\t 9: indigo\t10: violet\t11: magenta\n12: pink\t13: all"
 	read color_option
 	echo "Do you want to install the theme to your home directory? [Y/n]"
 	read install_option
@@ -74,6 +74,7 @@ else
 				echo "  -v, --verbose           verbosely specify script activity"
 				echo "For color options, either a number or the name of the color can be entered:"
 				echo -e " 0: gray\t 1: red \t 2: orange\t 3: yellow\n 4: grass\t 5: green\t 6: teal\t 7: cyan\n 8: blue\t 9: indigo\t10: violet\t11: magenta\n12: pink\t13: all"
+				echo "It will also accept a hex value in the format \"#RRGGBB\" (e.g. ##3584e4, case-insensitive)."
 				exit 0
 				;;
 			-i | "--install")
@@ -120,6 +121,7 @@ else
                 	"all") color_option=13 ;;
                 	[0-9]) color_option=$1 ;;
                 	[01][0-9]) color_option=$1 ;;
+			"#"[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]) echo "works" ; exit 0 ;;
                 	*) echo "Invalid input." ; exit 1 ;;
 		esac
 		shift
