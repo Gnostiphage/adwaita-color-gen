@@ -245,7 +245,7 @@ if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
 	#tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
 	tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
 else
-	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-master-$shell_version/data/theme
+	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-$shell_version/data/theme
 	#tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
 	tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
 fi
