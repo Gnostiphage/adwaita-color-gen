@@ -4,6 +4,8 @@
 if [ $# -eq 0 ]; then
 	echo -e "Please select which Adwaita variant to generate:\n 0: gray\t 1: red \t 2: orange\t 3: yellow\n 4: grass\t 5: green\t 6: teal\t 7: cyan\n 8: blue\t 9: indigo\t10: violet\t11: magenta\n12: pink\t13: all"
 	read color_option
+    echo "Do you use an older version of GNOME Shell? (Before 3.36) [Y/n]"
+    read version_option
 	echo "Do you want to install the theme to your home directory? [Y/n]"
 	read install_option
 	echo "Do you want to delete the source files afterwards? [Y/n]"
@@ -19,12 +21,13 @@ else
 	delete_option="n"
 	compress_option="n"
 	verbose_option="n"
+	version_option="n"
 
 	#scan through arguments for options/colors
 	while [ -n "$1" ]; do
 		case "$1" in
 			#if multiple options are combined into one argument, separate them (like a cheap getopts, but long options are ok)
-			-[cdhiv][cdhiv][cdhiv][cdhiv][cdhiv])
+			-[cdhiv][cdhiv][cdhiv][cdhiv][cdhiv][chdiv])
 				i=1
 				one=()
 				#this loop starts at the first letter of $1, adding option strings to the one array
@@ -35,7 +38,7 @@ else
 				#this rebuilds the scripts arguments list, first with an arbitrary string (to be discarded by the shift below), then the options array as new arguments, then the rest of them
 				set -- "replaced" "${one[@]}" "${@:2}"
 				;;
-			-[cdhiv][cdhiv][cdhiv][cdhiv])
+			-[cdhiv][cdhiv][cdhiv][cdhiv][chdiv])
 				i=1
 				one=()
 				while [ $i -lt ${#1} ] ; do
@@ -44,7 +47,16 @@ else
 				done
 				set -- "replaced" "${one[@]}" "${@:2}"
 				;;
-			-[cdhiv][cdhiv][cdhiv])
+			-[cdhiv][cdhiv][cdhiv][chdiv])
+				i=1
+				one=()
+				while [ $i -lt ${#1} ] ; do
+					one+=("-${1:$i:1}")
+					i=$((i+1))
+				done
+				set -- "replaced" "${one[@]}" "${@:2}"
+				;;
+			-[cdhiv][cdhiv][chdiv])
 				i=1
 				one=()
 				while [ $i -lt ${#1} ] ; do
@@ -72,9 +84,17 @@ else
 				echo "  -c, --compress          compress the generated variant(s) to \"archives\" directory"
 				echo "  -d, --delete            remove \"Adwaita-sources\" directory, as well as \"generated\" if -i is specified"
 				echo "  -v, --verbose           verbosely specify script activity"
+				echo "  -o, --old               use 3.34 source files for GNOME shell, instead of latest"
 				echo "For color options, either a number or the name of the color can be entered:"
 				echo -e " 0: gray\t 1: red \t 2: orange\t 3: yellow\n 4: grass\t 5: green\t 6: teal\t 7: cyan\n 8: blue\t 9: indigo\t10: violet\t11: magenta\n12: pink\t13: all"
 				exit 0
+				;;
+		    -o | "--old")
+		        version_option="Y"
+		        if [ -z "$2" ] && [ -z "$color_option" ]; then
+					echo -e "Please select which Adwaita variant to generate:\n 0: gray\t 1: red \t 2: orange\t 3: yellow\n 4: grass\t 5: green\t 6: teal\t 7: cyan\n 8: blue\t 9: indigo\t10: violet\t11: magenta\n12: pink\t13: all"
+					read color_option
+				fi
 				;;
 			-i | "--install")
 				install_option="Y"
@@ -147,6 +167,10 @@ if [ "$verbose_option" != "Y" ] && [ "$verbose_option" != "y" ] && [ "$verbose_o
 	echo "Please only enter Y or n for verbosity option, case insensitive."
         exit 1
 fi
+if [ "$version_option" != "Y" ] && [ "$version_option" != "y" ] && [ "$version_option" != "N" ] && [ "$version_option" != "n" ]; then
+	echo "Please only enter Y or n for old version option, case insensitive."
+        exit 1
+fi
 
 #function to streamline verbosity
 verbose() {
@@ -191,17 +215,24 @@ fi
 mkdir -p Adwaita-sources/{gnome-shell,gtk-3.0}
 mkdir archives
 
+#version option
+if [ "$version_option" == "Y" ] || [ "$version_option" == "y" ] ; then
+    shell_version="gnome-3-34"
+else
+    shell_version="master"
+fi
+
 #download/derive sources
 verbose "downloading sources if none exist"
 if [ -f ./Adwaita-sources/gnome-shell.tar.gz -a -f ./Adwaita-sources/gtk3.tar.gz ]; then
 	verbose files exist, using them
 else
 	if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
-		wget -O ./Adwaita-sources/gnome-shell.tar.gz https://gitlab.gnome.org/GNOME/gnome-shell/-/archive/master/gnome-shell-master.tar.gz?path=data/theme
+		wget -O ./Adwaita-sources/gnome-shell.tar.gz https://gitlab.gnome.org/GNOME/gnome-shell/-/archive/$shell_version/gnome-shell-$shell_version.tar.gz
 		# wget -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/master/gtk-master.tar.gz?path=gtk/theme/Adwaita #master branch doesn't have working scrollbars
 		wget -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/gtk-3-24/gtk-gtk-3-24.tar.gz?path=gtk/theme/Adwaita #3.24
 	else
-		wget -q -O ./Adwaita-sources/gnome-shell.tar.gz https://gitlab.gnome.org/GNOME/gnome-shell/-/archive/master/gnome-shell-master.tar.gz?path=data/theme
+		wget -q -O ./Adwaita-sources/gnome-shell.tar.gz https://gitlab.gnome.org/GNOME/gnome-shell/-/archive/$shell_version/gnome-shell-$shell_version.tar.gz
 		# wget -q -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/master/gtk-master.tar.gz?path=gtk/theme/Adwaita #master branch doesn't have working scrollbars
 		wget -q -O ./Adwaita-sources/gtk3.tar.gz https://gitlab.gnome.org/GNOME/gtk/-/archive/gtk-3-24/gtk-gtk-3-24.tar.gz?path=gtk/theme/Adwaita #3.24
 	fi
@@ -210,11 +241,11 @@ fi
 #extract sources, clean-up archives and gtk3 assets (that need to be regenerated anyway)
 verbose "extracting sources"
 if [ "$verbose_option" == "Y" ] || [ "$verbose_option" == "y" ] ; then
-	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzvf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-master-data-theme/data/theme
+	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzvf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-$shell_version/data/theme
 	#tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
 	tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzvf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
 else
-	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-master-data-theme/data/theme
+	tar -C ./Adwaita-sources/gnome-shell --strip-components=3 -xzf ./Adwaita-sources/gnome-shell.tar.gz gnome-shell-$shell_version/data/theme
 	#tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzf ./Adwaita-sources/gtk3.tar.gz gtk-master-gtk-theme-Adwaita/gtk/theme/Adwaita #master branch
 	tar -C ./Adwaita-sources/gtk-3.0 --strip-components=4 -xzf ./Adwaita-sources/gtk3.tar.gz gtk-gtk-3-24-gtk-theme-Adwaita/gtk/theme/Adwaita #3.24
 fi
