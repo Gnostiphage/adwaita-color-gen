@@ -216,7 +216,7 @@ mkdir -p Adwaita-sources/{gnome-shell,gtk-3.0}
 mkdir archives
 
 #version option
-if [ "$version_option" == "Y"] || [ "$version_option" == "y" ] ; then
+if [ "$version_option" == "Y" ] || [ "$version_option" == "y" ] ; then
     shell_version="gnome-3-34"
 else
     shell_version="master"
